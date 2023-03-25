@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net"
 	"os"
 )
@@ -33,8 +34,12 @@ func readLoop(conn net.Conn) {
 
 	for {
 		if _, err := conn.Read(buf); err != nil {
+			if err == io.EOF {
+				return
+			}
+
 			fmt.Println("error reading from client: ", err.Error())
-			os.Exit(1)
+			return
 		}
 
 		conn.Write([]byte("+PONG\r\n"))
