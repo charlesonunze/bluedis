@@ -14,6 +14,7 @@ func main() {
 		fmt.Println("Failed to bind to port 6379", err)
 		os.Exit(1)
 	}
+	defer l.Close()
 
 	for {
 		conn, err := l.Accept()
@@ -21,13 +22,13 @@ func main() {
 			fmt.Println("Error accepting connection: ", err.Error())
 			os.Exit(1)
 		}
-		defer conn.Close()
 
 		go readLoop(conn)
 	}
 }
 
 func readLoop(conn net.Conn) {
+	defer conn.Close()
 	buf := make([]byte, 1024)
 
 	for {
