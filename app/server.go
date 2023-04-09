@@ -33,7 +33,8 @@ func readLoop(conn net.Conn) {
 	buf := make([]byte, 1024)
 
 	for {
-		if _, err := conn.Read(buf); err != nil {
+		b, err := conn.Read(buf)
+		if err != nil {
 			if err == io.EOF {
 				return
 			}
@@ -42,6 +43,16 @@ func readLoop(conn net.Conn) {
 			return
 		}
 
-		conn.Write([]byte("+PONG\r\n"))
+		command := string(buf[:b])
+
+		if command[0] == '*' {
+			res := parseArray(command)
+			if res[0].(string) == "ECHO" {
+				bs := encodeBulkString(res[1].(string))
+				conn.Write([]byte(bs))
+			}
+		}
+
+		// conn.Write([]byte("+PONG\r\n"))
 	}
 }
