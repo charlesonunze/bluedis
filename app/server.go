@@ -51,8 +51,8 @@ func readLoop(conn net.Conn) {
 				bs := encodeBulkString(res[1].(string))
 				conn.Write([]byte(bs))
 			}
+		} else {
+			conn.Write([]byte("+PONG\r\n"))
 		}
-
-		// conn.Write([]byte("+PONG\r\n"))
 	}
 }
