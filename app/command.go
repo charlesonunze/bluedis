@@ -1,6 +1,6 @@
 package main
 
 const (
-	COMMAND_ECHO = "ECHO"
-	COMMAND_PING = "PING"
+	COMMAND_ECHO = "echo"
+	COMMAND_PING = "ping"
 )

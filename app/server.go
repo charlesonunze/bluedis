@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"strings"
 )
 
 func main() {
@@ -43,7 +44,7 @@ func readLoop(conn net.Conn) {
 
 		if command[0] == '*' {
 			res := parseArray(command)
-			cmd := res[0].(string)
+			cmd := strings.ToLower(res[0].(string))
 
 			switch cmd {
 			case COMMAND_PING:
