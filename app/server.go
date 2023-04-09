@@ -1,27 +1,24 @@
 package main
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"net"
-	"os"
 )
 
 func main() {
-	fmt.Println("Logs from your program will appear here!")
+	log.Println("Logs from your program will appear here!")
 
 	l, err := net.Listen("tcp", ":6379")
 	if err != nil {
-		fmt.Println("Failed to bind to port 6379", err)
-		os.Exit(1)
+		log.Fatal("Failed to bind to port 6379", err)
 	}
 	defer l.Close()
 
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			fmt.Println("Error accepting connection: ", err.Error())
-			os.Exit(1)
+			log.Fatal("Error accepting connection: ", err.Error())
 		}
 
 		go readLoop(conn)
@@ -34,12 +31,11 @@ func readLoop(conn net.Conn) {
 
 	for {
 		b, err := conn.Read(buf)
+		if err == io.EOF {
+			break
+		}
 		if err != nil {
-			if err == io.EOF {
-				return
-			}
-
-			fmt.Println("error reading from client: ", err.Error())
+			log.Fatal("error reading from client: ", err.Error())
 			return
 		}
 
@@ -47,12 +43,22 @@ func readLoop(conn net.Conn) {
 
 		if command[0] == '*' {
 			res := parseArray(command)
-			if res[0].(string) == "ECHO" {
-				bs := encodeBulkString(res[1].(string))
+			cmd := res[0].(string)
+
+			switch cmd {
+			case COMMAND_PING:
+				if len(res) > 1 {
+					bs := encodeBulkString(mergeStrings(res))
+					conn.Write([]byte(bs))
+				} else {
+					conn.Write([]byte("+PONG\r\n"))
+				}
+			case COMMAND_ECHO:
+				bs := encodeBulkString(mergeStrings(res))
 				conn.Write([]byte(bs))
+			default:
+				conn.Write([]byte("-ERR unknown command '" + cmd + "'\r\n"))
 			}
-		} else {
-			conn.Write([]byte("+PONG\r\n"))
 		}
 	}
 }

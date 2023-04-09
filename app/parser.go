@@ -5,15 +5,6 @@ import (
 	"strings"
 )
 
-func parseCommand(cmd string) {
-	firstChar := cmd[0]
-
-	switch firstChar {
-	case '*':
-		println("array")
-	}
-}
-
 func parseArray(s string) []interface{} {
 	var result []interface{}
 
