@@ -7,6 +7,12 @@ import (
 	"strings"
 )
 
+var kvStore *Store
+
+func init() {
+	kvStore = NewStore()
+}
+
 func main() {
 	log.Println("Logs from your program will appear here!")
 
@@ -40,25 +46,23 @@ func readLoop(conn net.Conn) {
 			return
 		}
 
-		command := string(buf[:b])
+		respString := string(buf[:b])
 
-		if command[0] == '*' {
-			res := parseArray(command)
-			cmd := strings.ToLower(res[0].(string))
+		if respString[0] == '*' {
+			res := parseArray(respString)
+			command := strings.ToLower(res[0].(string))
 
-			switch cmd {
+			switch command {
 			case COMMAND_PING:
-				if len(res) > 1 {
-					bs := encodeBulkString(mergeStrings(res))
-					conn.Write([]byte(bs))
-				} else {
-					conn.Write([]byte("+PONG\r\n"))
-				}
+				handlePing(conn, res)
 			case COMMAND_ECHO:
-				bs := encodeBulkString(mergeStrings(res))
-				conn.Write([]byte(bs))
+				handleEcho(conn, res)
+			case COMMAND_SET:
+				handleSet(conn, res)
+			case COMMAND_GET:
+				handleGet(conn, res)
 			default:
-				conn.Write([]byte("-ERR unknown command '" + cmd + "'\r\n"))
+				conn.Write([]byte(encodeError(ErrUnknownCommand + command)))
 			}
 		}
 	}

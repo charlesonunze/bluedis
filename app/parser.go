@@ -34,15 +34,16 @@ func parseArray(s string) []interface{} {
 				sb.WriteString(string(char))
 			}
 
-			lengthOfWord, _ := strconv.Atoi(sb.String())
+			str := sb.String()
+			lengthOfWord, _ := strconv.Atoi(str)
 
-			start := index + crlfLength + len(sb.String()) + 1
+			start := index + crlfLength + len(str) + 1
 			end := start + lengthOfWord
-
 			word := arrElements[start:end]
+
 			result = append(result, word)
 
-			index = start + end - crlfLength
+			index = end + crlfLength
 		}
 	}
 
