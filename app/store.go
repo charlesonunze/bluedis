@@ -25,3 +25,9 @@ func (s *Store) Get(k string) string {
 	defer s.mu.RUnlock()
 	return s.store[k]
 }
+
+func (s *Store) Del(k string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.store, k)
+}
