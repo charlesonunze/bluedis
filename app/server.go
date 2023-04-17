@@ -1,16 +1,29 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
+	"os"
 	"strings"
 )
 
-var kvStore *Store
+var (
+	kvStore   *Store
+	ftl *FileTransactionLogger
+)
 
 func init() {
 	kvStore = NewStore()
+
+	f, err := os.OpenFile("store", os.O_RDWR|os.O_APPEND|os.O_CREATE, 0755)
+	if err != nil {
+		panic(fmt.Errorf("cannot open transaction log file: %w", err))
+	}
+
+	ftl = NewFileTransactionLogger(f)
+	ftl.Restore(kvStore)
 }
 
 func main() {
@@ -21,6 +34,7 @@ func main() {
 		log.Fatal("Failed to bind to port 6379", err)
 	}
 	defer l.Close()
+	defer ftl.Close()
 
 	for {
 		conn, err := l.Accept()

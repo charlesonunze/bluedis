@@ -27,7 +27,7 @@ func handleEcho(conn net.Conn, res []any) {
 func handleSet(conn net.Conn, res []any) {
 	k, v := res[1].(string), res[2].(string)
 	kvStore.Set(k, v)
-
+	ftl.WritePut(k, v)
 	handleSetOptions(k, v, res[3:])
 
 	result := encodeSimpleString("OK")
